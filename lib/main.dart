@@ -20,7 +20,6 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    final productRepository = ProductRepositoryImpl();
     final getProductsUseCase = GetProductList(productRepository);
     final addProductUseCase = AddProduct(productRepository);
     final updateProductUseCase = UpdateProduct(productRepository);

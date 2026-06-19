@@ -17,21 +17,13 @@ class ProductRepositoryImpl extends ProductRepository {
     ),
   ];
   @override
-  Future<List<Product>> getProductsData({
-    String? query,
-    String? category,
-  }) async {
+  Future<List<Product>> getProductsData({String? query}) async {
     await Future.delayed(Duration(seconds: 2));
     List<Product> result = List.from(_arrProduct);
     if (query != null && query.isNotEmpty) {
       result = result
           .where((p) => p.name.toLowerCase().contains(query.toLowerCase()))
           .toList();
-    }
-    if (category == "Tất cả") {
-      return result;
-    } else if (category != null && category.isNotEmpty) {
-      result = result.where((p) => p.category == category).toList();
     }
 
     return result;
@@ -46,7 +38,7 @@ class ProductRepositoryImpl extends ProductRepository {
   @override
   Future<void> deleteProductData(String id) async {
     // TODO: implement deleteProductData
-    var index = _arrProduct.indexWhere((product) => product.id == id);
+    final index = _arrProduct.indexWhere((product) => product.id == id);
     if (index != -1) {
       _arrProduct.removeAt(index);
     }
@@ -55,7 +47,7 @@ class ProductRepositoryImpl extends ProductRepository {
   @override
   Future<void> updateProductData(Product product) async {
     // TODO: implement updateProductData
-    var index = _arrProduct.indexWhere((data) => data.id == product.id);
+    final index = _arrProduct.indexWhere((data) => data.id == product.id);
     if (index != -1) {
       _arrProduct[index] = product;
     } else {

@@ -1,7 +1,7 @@
 import 'package:prjbloc/features/domain/entities/product.dart';
 
 abstract class ProductRepository {
-  Future<List<Product>> getProductsData({String? query, String? category});
+  Future<List<Product>> getProductsData({String? query});
   Future<void> addProductData(Product product);
   Future<void> updateProductData(Product product);
   Future<void> deleteProductData(String id);
