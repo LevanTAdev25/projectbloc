@@ -1,4 +1,5 @@
 import 'package:prjbloc/features/domain/entities/product.dart';
+import 'package:equatable/equatable.dart';
 
 sealed class ProductState {}
 
@@ -6,11 +7,17 @@ class ProductInitialize extends ProductState {}
 
 class ProductLoading extends ProductState {}
 
-class ProductLoadSuccess extends ProductState {
+class ProductLoadSuccess extends ProductState with EquatableMixin {
   final List<Product> listProducts;
   final String selectedCategory;
   final String query;
-  ProductLoadSuccess(this.listProducts, {this.selectedCategory = "Tất cả", this.query = ""});
+  ProductLoadSuccess(
+    this.listProducts, {
+    this.selectedCategory = "Tất cả",
+    this.query = "",
+  });
+  @override
+  List<Object?> get props => [listProducts, selectedCategory, query];
 }
 
 class ProductError extends ProductState {
@@ -42,7 +49,9 @@ class ProductFormState extends ProductState {
       name: name ?? this.name,
       price: price ?? this.price,
       category: category ?? this.category,
-      editingProductId: clearEditingId ? null : (editingProductId ?? this.editingProductId),
+      editingProductId: clearEditingId
+          ? null
+          : (editingProductId ?? this.editingProductId),
     );
   }
 }
