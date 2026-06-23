@@ -1,33 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:prjbloc/features/domain/entities/product.dart';
-import 'package:prjbloc/features/domain/usecases/add_product.dart';
-import 'package:prjbloc/features/domain/usecases/filter_by_category.dart';
-import 'package:prjbloc/features/domain/usecases/get_product_list.dart';
-import 'package:prjbloc/features/domain/usecases/remove_product.dart';
-import 'package:prjbloc/features/domain/usecases/update_product.dart';
+import 'package:prjbloc/features/domain/usecases/add_product_usecase.dart';
+import 'package:prjbloc/features/domain/usecases/filter_by_category_usecase.dart';
+import 'package:prjbloc/features/domain/usecases/get_product_list_usecase.dart';
+import 'package:prjbloc/features/domain/usecases/remove_product_usecase.dart';
+import 'package:prjbloc/features/domain/usecases/update_product_usecase.dart';
 import 'package:prjbloc/features/presentation/bloc/product_state.dart';
-import 'package:prjbloc/features/presentation/pages/widgets/update_product_page.dart';
-import 'package:prjbloc/features/presentation/pages/widgets/add_product_page.dart';
 
 class ProductCubit extends Cubit<ProductState> {
-  final GetProductList _getProductList;
-  final AddProduct _addProduct;
-  final RemoveProduct _removeProduct;
-  final UpdateProduct _updateProduct;
-  final FilterByCategory _filterByCategory;
+  final GetProductListUseCase _getProductListUseCase;
+  final AddProductUseCase _addProductUseCase;
+  final RemoveProductUseCase _removeProductUseCase;
+  final UpdateProductUseCase _updateProductUseCase;
+  final FilterByCategoryUseCase _filterByCategoryUseCase;
 
   ProductCubit({
-    required this._getProductList,
-    required this._addProduct,
-    required this._removeProduct,
-    required this._updateProduct,
-    required this._filterByCategory,
+    required this._getProductListUseCase,
+    required this._addProductUseCase,
+    required this._removeProductUseCase,
+    required this._updateProductUseCase,
+    required this._filterByCategoryUseCase,
   }) : super(ProductInitialize());
   Future<void> loadProducts({String? query, String? category}) async {
     emit(ProductLoading());
     try {
-      List<Product> arrProduct = await _getProductList(query: query);
+      List<Product> arrProduct = await _getProductListUseCase(query: query);
       emit(
         ProductLoadSuccess(
           arrProduct,
@@ -40,19 +38,20 @@ class ProductCubit extends Cubit<ProductState> {
     }
   }
 
+  void validate() {}
   Future<void> addNewProduct(Product product) async {
+    emit(ProductLoading());
     try {
-      await _addProduct(product: product);
-
-      await loadProducts();
+      await _addProductUseCase(product: product);
     } catch (e) {
       emit(ProductError(e.toString().replaceAll("Exception: ", "")));
     }
   }
 
   Future<void> removeCurrentProduct(String id) async {
+    emit(ProductLoading());
     try {
-      await _removeProduct(id: id);
+      await _removeProductUseCase(id: id);
       await loadProducts();
     } catch (e) {
       emit(ProductError(e.toString().replaceAll("Exception: ", "")));
@@ -60,9 +59,9 @@ class ProductCubit extends Cubit<ProductState> {
   }
 
   Future<void> updateCurrentProduct(Product product) async {
+    emit(ProductLoading());
     try {
-      await _updateProduct(product: product);
-      await loadProducts();
+      await _updateProductUseCase(product: product);
     } catch (e) {
       emit(ProductError(e.toString().replaceAll("Exception: ", "")));
     }
@@ -71,7 +70,7 @@ class ProductCubit extends Cubit<ProductState> {
   Future<void> newProductListByCategory(String? category) async {
     emit(ProductLoading());
     try {
-      final newListProduct = await _filterByCategory(category: category);
+      final newListProduct = await _filterByCategoryUseCase(category: category);
       emit(
         ProductLoadSuccess(
           newListProduct,
@@ -135,8 +134,9 @@ class ProductCubit extends Cubit<ProductState> {
       category: formState.category,
     );
     try {
-      await addNewProduct(product);
       emit(ProductActionSuccess("Thêm sản phẩm thành công"));
+      await addNewProduct(product);
+      await loadProducts();
     } catch (e) {
       emit(ProductError(e.toString().replaceAll("Exception: ", "")));
       emit(formState);
@@ -155,8 +155,9 @@ class ProductCubit extends Cubit<ProductState> {
       category: formState.category,
     );
     try {
-      await updateCurrentProduct(product);
       emit(ProductActionSuccess("Đã chỉnh sửa thành công"));
+      await updateCurrentProduct(product);
+      await loadProducts();
     } catch (e) {
       emit(ProductError(e.toString().replaceAll("Exception: ", "")));
       emit(formState);
@@ -166,35 +167,5 @@ class ProductCubit extends Cubit<ProductState> {
   Future<void> snackBarPopUpdate(
     BuildContext parentContext,
     Product product,
-  ) async {
-    parentContext.read<ProductCubit>().initEditForm(product);
-    final result = await Navigator.push(
-      parentContext,
-      MaterialPageRoute(builder: (context) => UpdateProductPage()),
-    );
-    if (!parentContext.mounted) {
-      return;
-    }
-    if (result != null) {
-      ScaffoldMessenger.of(parentContext)
-        ..removeCurrentSnackBar()
-        ..showSnackBar(SnackBar(content: Text("$result")));
-    }
-  }
-
-  Future<void> snackBarPopAdd(BuildContext context) async {
-    context.read<ProductCubit>().initCreateForm();
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => AddProductPage()),
-    );
-    if (!context.mounted) {
-      return;
-    }
-    if (result != null) {
-      ScaffoldMessenger.of(context)
-        ..removeCurrentSnackBar()
-        ..showSnackBar(SnackBar(content: Text("$result")));
-    }
-  }
+  ) async {}
 }
