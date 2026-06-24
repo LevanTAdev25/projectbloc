@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:prjbloc/features/presentation/bloc/product_cubit.dart';
 import 'package:prjbloc/features/presentation/bloc/product_state.dart';
+import 'package:prjbloc/features/presentation/pages/widgets/add_product_page.dart';
+import 'package:prjbloc/features/presentation/pages/widgets/update_product_page.dart';
 
 class ProductListPage extends StatelessWidget {
   const ProductListPage({super.key});
@@ -160,10 +162,27 @@ class ProductListPage extends StatelessWidget {
                                       Icons.edit_outlined,
                                       color: Colors.blue,
                                     ),
-                                    onPressed: () {
+                                    onPressed: () async {
                                       blocContext
                                           .read<ProductCubit>()
-                                          .snackBarPopUpdate(context, product);
+                                          .initEditForm(product);
+                                      final result = await Navigator.push(
+                                        blocContext,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              UpdateProductPage(),
+                                        ),
+                                      );
+                                      if (!blocContext.mounted) {
+                                        return;
+                                      }
+                                      if (result != null) {
+                                        ScaffoldMessenger.of(blocContext)
+                                          ..removeCurrentSnackBar()
+                                          ..showSnackBar(
+                                            SnackBar(content: Text("$result")),
+                                          );
+                                      }
                                     },
                                   ),
                                 ],
@@ -182,8 +201,22 @@ class ProductListPage extends StatelessWidget {
             ],
           ),
           floatingActionButton: FloatingActionButton.extended(
-            onPressed: () =>
-                context.read<ProductCubit>().snackBarPopAdd(context),
+            onPressed: () async {
+              context.read<ProductCubit>().initCreateForm();
+              final result = await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => AddProductPage()),
+              );
+              if (!context.mounted) {
+                return;
+              }
+              if (result != null) {
+                ScaffoldMessenger.of(context)
+                  ..removeCurrentSnackBar()
+                  ..showSnackBar(SnackBar(content: Text("$result")));
+              }
+            },
+
             label: const Text("Thêm"),
             icon: const Icon(Icons.add),
           ),
